@@ -1,0 +1,6 @@
+#!/usr/bin/env lua
+
+lb = require('lb')
+
+lb.run()
+
