@@ -328,7 +328,7 @@ end
 -----------------------------------------------------
 function parse_cflags( cflags )
 	local t = {}
-	local cflags = cflags or "-g"
+	local cflags = cflags or "g"
 	
 	t = split_text( cflags )
 	
@@ -507,7 +507,7 @@ end
 -----------------------------------------------------
 local predir = "./"
 local olddir = "./"
-function recurse_objs(t, d)
+function recurse_objs(t, d, file_table)
         if d ~= '.' then 
         	olddir = predir
         	predir = predir .. d .. '/'
@@ -519,7 +519,9 @@ function recurse_objs(t, d)
 			if aa then
 				if aa.mode == "directory" then
 					-- if that name is a directory, recurse
-					recurse_objs(t, f)
+					if file_table[f] then
+						recurse_objs(t, f, file_table)
+					end
 				elseif aa.mode == "file" then
 					-- if that name is a file, insert it into table t if it's .o file
 					if f:find(".+%.o") then
@@ -544,9 +546,9 @@ end
 -- do link action
 --
 -----------------------------------------------------
-function apply_link()
+function apply_link( file_table )
 	local objfile_table = {} 	
-	recurse_objs(objfile_table, '.')
+	recurse_objs(objfile_table, '.', file_table)
 	local str = table.concat(objfile_table, " ")
 
 	if check_objtime(objfile_table) then
@@ -620,7 +622,7 @@ function run()
 	end
 
 	apply_compile( file_table )
-	apply_link()
+	apply_link( file_table )
 		
 	return true
 end
